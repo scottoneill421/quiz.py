@@ -6,12 +6,34 @@ def get_notes(file):
 	with open(file, "r") as f:
 		notes = f.readlines()
 	
-	notes = [line.strip() for line in notes]
+	notes = [line for line in notes]
 
 	return notes
 
+
+def get_cards(notes):
+	cards = {}
+	key = None
+	val = ""
+
+	for i in notes:
+		if not i.startswith("\t"):
+			if key is not None:
+				cards[key] = val.strip()
+				val = ""
+			key = i.strip()
+		else:
+			val += i.replace('\t', '') + " "
+
+	if key is not None:
+		cards[key] = val.strip()
+
+	return cards
+
+
 def usage():
 	print("Usage: quiz.py -r <file> or quiz.py --read <file>")
+
 
 def main(argv):
 	file = None
@@ -31,9 +53,7 @@ def main(argv):
 	
 	if file is not None:
 		notes = get_notes(file)
-	
-		for note in notes:
-			print(note)
+		cards = get_cards(notes)
 
 	else:
 		usage()
