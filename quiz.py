@@ -4,6 +4,9 @@ import getopt
 import re
 import random
 
+from getch import getch
+
+
 def get_notes(file):
 	"""open file, return lines as list"""
 	with open(file, "r") as f:
@@ -39,6 +42,10 @@ def get_cards(notes):
 	if key is not None:
 		cards[key] = val.strip()
 
+	# clear weird empty key/value pair
+	if '' in cards and cards[''] == '':
+		del cards['']
+
 	return cards
 
 
@@ -48,27 +55,35 @@ def run_quiz(cards):
 	while True:
 		os.system('clear')
 
+		#define key variables
 		length = len(cards)
 		keys = list(cards.keys())	
 		i = random.randint(0, length - 1)
 		k = keys[i]
-		
 		ul = ""
 		i = 0
+		
+		#create border string
 		while i < len(k):
 			ul += '-'
 			i += 1
+
+		#print out the question
 		print(k + '\n' + ul + '\n\n' + ul)
-		kp = input("enter - reveal answer\nq - quit\n")
-		if kp.endswith('q'):
+		print("any:\treveal answer\nq:\tquit\n")
+		c = getch()
+		if c.lower() == 'q':
+			print("Quitting...")
 			sys.exit()
-		
 		os.system('clear')
 		
+		#print out the question with answer
 		print(k + '\n' + ul + '\n')
 		print(cards[k].rstrip() + '\n\n' + ul)
-		kp = input("enter - reveal answer\nq - quit\n")
-		if kp.endswith('q'):
+		print("any:\treveal answer\nq:\tquit\n")
+		c = getch()
+		if c.lower() == 'q':
+			print("Quitting...")
 			sys.exit()
 
 
@@ -80,12 +95,14 @@ def usage():
 def main(argv):
 	file = None
 
+	# confirm user input is valid, if not valid getopt, ERR
 	try:
 		opts, args = getopt.getopt(argv, "hr:", ["help", "read="])
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
 	
+	# define user options, read/help
 	for opt, arg in opts:
 		if opt in ("-h", "--help"):
 			usage()
@@ -93,6 +110,7 @@ def main(argv):
 		elif opt in ("-r", "--read"):
 			file = arg
 	
+	# run program
 	if file is not None:
 		notes = get_notes(file)
 		cards = get_cards(notes)
