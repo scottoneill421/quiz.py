@@ -42,25 +42,35 @@ def get_cards(notes):
 	return cards
 
 
-def present_card(cards):
+def run_quiz(cards):
 	"""Presents a question, prompt user, then provide answer"""
-	os.system('clear')
-	
-	length = len(cards)
-	keys = list(cards.keys())
-	
-	i = random.randint(0, length - 1)
-	k = keys[i]
-	
-	ul = ""
-	i = 0
-	while i < len(k):
-		ul += '-'
-		i += 1
+	kp = ""
+	while True:
+		os.system('clear')
 
-	print(k)
-	kp = input(ul)
-	kp = input(cards[k])
+		length = len(cards)
+		keys = list(cards.keys())	
+		i = random.randint(0, length - 1)
+		k = keys[i]
+		
+		ul = ""
+		i = 0
+		while i < len(k):
+			ul += '-'
+			i += 1
+		print(k + '\n' + ul + '\n\n' + ul)
+		kp = input("enter - reveal answer\nq - quit\n")
+		if kp.endswith('q'):
+			sys.exit()
+		
+		os.system('clear')
+		
+		print(k + '\n' + ul + '\n')
+		print(cards[k].rstrip() + '\n\n' + ul)
+		kp = input("enter - reveal answer\nq - quit\n")
+		if kp.endswith('q'):
+			sys.exit()
+
 
 
 def usage():
@@ -86,7 +96,7 @@ def main(argv):
 	if file is not None:
 		notes = get_notes(file)
 		cards = get_cards(notes)
-		present_card(cards)
+		run_quiz(cards)
 	else:
 		usage()
 
