@@ -41,7 +41,7 @@ def get_cards(notes):
 			else:
 				val += i[1:] if i.startswith("\t") else i
 
-	
+	# Add last item after loop ends
 	if key is not None:
 		cards[key] = val.strip()
 
@@ -50,6 +50,42 @@ def get_cards(notes):
 		del cards['']
 
 	return cards
+
+
+def gen_templates(file):
+	"""generates template notes files based on contents"""
+	if file is None:
+		usage()
+		sys.exit(2)
+	
+	templates = {}
+	key = None
+	val = []
+
+	notes = get_notes(file)
+
+	# generate a dictionary of chapters and their relevant topics.
+	for i in notes:
+		i = i.strip()
+		if i and i[0].isdigit():
+			if key is not None and val:
+				templates[key.lower()] = val
+				val = []
+			key = i.replace('.', '').replace(' ', '-')
+		elif i and i[0] == '-':
+			val.append(i.replace('-', '').strip())
+	
+	# add last item after loop completes
+	if key is not None and val:
+		templates[key.lower()] = val
+
+	# take the dictionary and make template notes files
+	for key, value in templates.items():
+		file = key + ".notes"
+		with open(file, 'w') as f:
+			f.write('# ' + key[2:].replace('-', ' ').title() + "\n\n")
+			for i in value:
+				f.write(i + "\n\n")
 
 
 def run_quiz(file):
@@ -95,15 +131,12 @@ def run_quiz(file):
 		if c.lower() == 'q':
 			print("Quitting...")
 			sys.exit()
-			
 
 
 def main(argv):
-	file = None
-
 	# confirm user input is valid, if not valid getopt, ERR
 	try:
-		opts, args = getopt.getopt(argv, "hr:", ["help", "read="])
+		opts, args = getopt.getopt(argv, "hrt:", ["help", "read=", "template"])
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
@@ -115,9 +148,9 @@ def main(argv):
 			sys.exit()
 		elif opt in ("-r", "--read"):
 			run_quiz(arg)
-
-	
-	# run program
+		elif opt in ("-t", "--template"):
+			gen_templates(arg)
+			print("Note files generated.")
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
