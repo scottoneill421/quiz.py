@@ -6,6 +6,9 @@ import random
 
 from getch import getch
 
+def usage():
+	print("Usage: quiz.py -r <file> or quiz.py --read <file>")
+
 
 def get_notes(file):
 	"""open file, return lines as list"""
@@ -49,8 +52,15 @@ def get_cards(notes):
 	return cards
 
 
-def run_quiz(cards):
+def run_quiz(file):
 	"""Presents a question, prompt user, then provide answer"""
+	if file is None:
+		usage()
+		sys.exit(2)
+	else:
+		notes = get_notes(file)
+		cards = get_cards(notes)
+	
 	kp = ""
 	while True:
 		os.system('clear')
@@ -85,11 +95,7 @@ def run_quiz(cards):
 		if c.lower() == 'q':
 			print("Quitting...")
 			sys.exit()
-
-
-
-def usage():
-	print("Usage: quiz.py -r <file> or quiz.py --read <file>")
+			
 
 
 def main(argv):
@@ -108,15 +114,10 @@ def main(argv):
 			usage()
 			sys.exit()
 		elif opt in ("-r", "--read"):
-			file = arg
+			run_quiz(arg)
+
 	
 	# run program
-	if file is not None:
-		notes = get_notes(file)
-		cards = get_cards(notes)
-		run_quiz(cards)
-	else:
-		usage()
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
