@@ -15,42 +15,36 @@ def get_notes(files):
 	notes = []
 	for file in files:
 		with open(file, "r") as f:
-			notes.extend(f.readlines())
-	
+			buffer = []
+			buffer.append(file)
+			buffer.extend(f.readlines())
+			notes.append(buffer)
 	return notes
 
 
 def get_cards(notes):
 	"""take list from get_notes, turn into a dict"""
 	cards = {}
-	key = None
-	val = ""
+	
+	for entry in notes:
+		chapter = entry[0]
+		cards[chapter] = {}
+		key = None
+		val = ''
 
-	for i in notes:
-		#remove all leading whitespace except \t
-		i = re.sub(r"^(?![\t])[ \t]+", "", i)
-
-		#skip comments, make key value pairs, 
-		#not tabbed = key, proceeding tabbed lines = values
-		if i and not i.startswith('#'):
-			if not i.startswith("\t"):
-				if key is not None:
-					cards[key] = val
-					val = ""
-				key = i.strip()
-			else:
-				val += i[1:] if i.startswith("\t") else i
-
-	# Add last item after loop ends
-	if key is not None:
-		cards[key] = val.strip()
-
-	# clear weird empty key/value pair
-	if '' in cards and cards[''] == '':
-		del cards['']
-
+		for line in entry[1:]:
+			if line.strip() and not line.startswith('#'):
+				if not line.startswith('\t'):
+					if key is not None:
+						cards[chapter][key] = val.strip()
+					key = line
+					val = ''
+				else:
+					val += line
+		
+		if key is not None and val:
+			cards[chapter][key] = val.strip()
 	return cards
-
 
 def gen_templates(file):
 	"""generates template notes files based on contents"""
@@ -97,40 +91,34 @@ def run_quiz(files):
 		notes = get_notes(files)
 		cards = get_cards(notes)
 	
-	kp = ""
-	while True:
-		os.system('clear')
+	chapters = cards.keys()
 
-		#define key variables
-		length = len(cards)
-		keys = list(cards.keys())	
-		i = random.randint(0, length - 1)
-		k = keys[i]
-		ul = ""
+	for chapter in chapters:
+		title = chapter.replace('-', ' ').replace('.notes', '').title()
 		i = 0
-		
-		#create border string
-		while i < len(k):
-			ul += '-'
+		border = ""
+		while i < len(chapter):
+			border += '-'
 			i += 1
-
-		#print out the question
-		print(k + '\n' + ul + '\n\n' + ul)
-		print("any:\treveal answer\nq:\tquit\n")
-		c = getch()
-		if c.lower() == 'q':
-			print("Quitting...")
-			sys.exit()
-		os.system('clear')
 		
-		#print out the question with answer
-		print(k + '\n' + ul + '\n')
-		print(cards[k].rstrip() + '\n\n' + ul)
-		print("any:\treveal answer\nq:\tquit\n")
-		c = getch()
-		if c.lower() == 'q':
-			print("Quitting...")
-			sys.exit()
+		topics = cards[chapter].keys()
+		for topic in topics:
+			os.system('clear')
+			print('\033[1m' + title + '\033[0m' + '\n\n' + topic.strip() + '\n' + border + '\n\n' + border)
+			print("any:\treveal answer\nq:\tquit\n")
+			c = getch()
+			if c.lower() == 'q':
+				print("Quitting...")
+				sys.exit()
+			
+			os.system('clear')
+			print('\033[1m' + title + '\033[0m' + '\n\n' + topic.strip() + '\n' + border + '\n')
+			print(cards[chapter][topic].rstrip() + '\n\n' + border)
+			print("any:\tnext question\nq:\tquit\n")
+			c = getch()
+			if c.lower() == 'q':
+				print("Quitting...")
+				sys.exit()
 
 
 def main(argv):
