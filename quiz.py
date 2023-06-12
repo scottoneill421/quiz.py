@@ -10,13 +10,13 @@ def usage():
 	print("Usage: quiz.py -r <file> or quiz.py --read <file>")
 
 
-def get_notes(file):
+def get_notes(files):
 	"""open file, return lines as list"""
-	with open(file, "r") as f:
-		notes = f.readlines()
+	notes = []
+	for file in files:
+		with open(file, "r") as f:
+			notes.extend(f.readlines())
 	
-	notes = [line for line in notes]
-
 	return notes
 
 
@@ -88,13 +88,13 @@ def gen_templates(file):
 				f.write(i + "\n\n")
 
 
-def run_quiz(file):
+def run_quiz(files):
 	"""Presents a question, prompt user, then provide answer"""
-	if file is None:
+	if files is None:
 		usage()
 		sys.exit(2)
 	else:
-		notes = get_notes(file)
+		notes = get_notes(files)
 		cards = get_cards(notes)
 	
 	kp = ""
@@ -136,7 +136,7 @@ def run_quiz(file):
 def main(argv):
 	# confirm user input is valid, if not valid getopt, ERR
 	try:
-		opts, args = getopt.getopt(argv, "hrt:", ["help", "read=", "template"])
+		opts, args = getopt.getopt(argv, "hrt:", ["help", "read=", "template="])
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
@@ -147,7 +147,8 @@ def main(argv):
 			usage()
 			sys.exit()
 		elif opt in ("-r", "--read"):
-			run_quiz(arg)
+			files = argv[1:]
+			run_quiz(files)
 		elif opt in ("-t", "--template"):
 			gen_templates(arg)
 			print("Note files generated.")
