@@ -12,6 +12,10 @@ def usage():
 
 def get_notes(files):
 	"""open file, return lines as list"""
+	# If only one string, convert to a list
+	if isinstance(files, str):
+		files = [files]
+
 	notes = []
 	for file in files:
 		with open(file, "r") as f:
@@ -57,9 +61,8 @@ def gen_templates(file):
 	val = []
 
 	notes = get_notes(file)
-
 	# generate a dictionary of chapters and their relevant topics.
-	for i in notes:
+	for i in notes[0][1:]:
 		i = i.strip()
 		if i and i[0].isdigit():
 			if key is not None and val:
@@ -68,7 +71,7 @@ def gen_templates(file):
 			key = i.replace('.', '').replace(' ', '-')
 		elif i and i[0] == '-':
 			val.append(i.replace('-', '').strip())
-	
+
 	# add last item after loop completes
 	if key is not None and val:
 		templates[key.lower()] = val
@@ -138,7 +141,8 @@ def main(argv):
 			files = argv[1:]
 			run_quiz(files)
 		elif opt in ("-t", "--template"):
-			gen_templates(arg)
+			file = argv[1]
+			gen_templates(file)
 			print("Note files generated.")
 
 if __name__ == "__main__":
